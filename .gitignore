@@ -1,0 +1,5 @@
+# OS X
+.DS_Store
+
+# Disregard development tools on a live site (for now)
+node_modules/

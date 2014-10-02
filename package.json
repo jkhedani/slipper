@@ -1,0 +1,22 @@
+{
+  "name": "slipper",
+  "version": "0.1.0",
+  "description": "You don't need a bootstrap to put a slipper on.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jkhedani/slipper"
+  },
+  "keywords": [
+    "bootstrap",
+    "slipper",
+    "front",
+    "end",
+    "development"
+  ],
+  "author": "Justin Hedani",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jkhedani/slipper/issues"
+  },
+  "homepage": "https://github.com/jkhedani/slipper"
+}
