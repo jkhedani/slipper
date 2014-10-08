@@ -1,5 +1,6 @@
 # OS X
 .DS_Store
 
-# Disregard development tools on a live site (for now)
+# Node/NPM
 node_modules/
+npm-debug.log
