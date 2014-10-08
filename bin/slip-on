@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+
+// Configuration
+var program = require('commander');
+//var mkdirp = require('mkdirp');
+var pkg = require('../package.json');
+var version = pkg.version;
+// Node Core
+var fs = require('fs');
+var path = require('path');
+
+// CLI
+program
+  .version(version)
+  .usage('[options] [dir]')
+  .option('--help', 'Directions for your slipper. You are here.')
+  //.option('    --hbs', 'add handlebars engine support')
+  //.option('-H, --hogan', 'add hogan.js engine support')
+  //.option('-c, --css <engine>', 'add stylesheet <engine> support (less|stylus|compass) (defaults to plain css)')
+  //.option('-f, --force', 'force on non-empty directory')
+  .parse(process.argv);
+
+// Path
+// ???
+var destination_path = program.args.shift() || '.';
+
+// App name
+// ???
+var app_name = path.basename(path.resolve(destination_path));
+
+/**
+ * Generate application
+ */
+(function createApplication(path) {
+  emptyDirectory(path, function(empty){
+    if (empty || program.force) {
+      createApplicationAt(path);
+    } else {
+      console.log('destination is not empty.');
+      //program.confirm('destination is not empty, continue? ', function(ok){
+      //  if (ok) {
+      //    process.stdin.destroy();
+      //    createApplicationAt(path);
+      //  } else {
+      //    abort('aborting');
+      //  }
+      //});
+    }
+  });
+})(destination_path);
+
+function createApplicationAt(path) {
+  console.log();
+  process.on('exit', function(){
+    console.log();
+    console.log('   install dependencies:');
+    console.log('     $ cd %s && npm install', path);
+    console.log();
+    console.log('   run the app:');
+    console.log('     $ DEBUG=' + app_name + ' ./bin/www');
+    console.log();
+  });
+
+  //mkdir(path, function(){
+    //write(path + '/package.json', JSON.stringify(pkg, null, 2));
+    //write(path + '/app.js', app);
+    //mkdir(path + '/bin', function(){
+    //  www = www.replace('{name}', app_name);
+    //  write(path + '/bin/www', www, 0755);
+    //});
+  //});
+}
+
+/**
+ * Helper Functions
+ * Useful helpers created by the expressjs team for
+ * their generator.
+ *
+ * @link https://github.com/expressjs/generator
+ */
+
+/**
+ * Check if the given directory `path` is empty.
+ *
+ * @param {String} path
+ * @param {Function} fn
+ */
+
+function emptyDirectory(path, fn) {
+  fs.readdir(path, function(err, files){
+    if (err && 'ENOENT' != err.code) throw err;
+    fn(!files || !files.length);
+  });
+}
+
+
+/**
+ * Mkdir -p.
+ *
+ * @param {String} path
+ * @param {Function} fn
+ */
+
+function mkdir(path, fn) {
+  mkdirp(path, 0755, function(err){
+    if (err) throw err;
+    console.log('   \033[36mcreate\033[0m : ' + path);
+    fn && fn();
+  });
+}
