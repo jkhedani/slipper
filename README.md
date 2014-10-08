@@ -1,27 +1,21 @@
 # Slipper
 You don't need a bootstrap to put on a slipper.
 
-Requires:
-Node Package Manager (npm)
-gulp
+### Installation
 
+1. npm install -g slip-on
+2. slip-on geta
+
+### Slipper Types
+Various walks of life deserve their own unique slipper.
+
+**Geta**
+gulp
 gulp-watch
 gulp-livereload
-
 gulp-autoprefixer
 gulp-stylus
 gulp-imagemin
-
 gulp-uglify
 
-# Features
-Coming Soon.
-
-# Installation
-Coming Soon.
-
-# Usage
-Coming Soon.
-
-# F.A.Q.
-Coming Soon
+**Rubber** Coming soon
