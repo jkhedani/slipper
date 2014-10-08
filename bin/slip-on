@@ -2,12 +2,15 @@
 
 // Configuration
 var program = require('commander');
-//var mkdirp = require('mkdirp');
+var mkdirp = require('mkdirp');
+var prompt = require('prompt');
 var pkg = require('../package.json');
 var version = pkg.version;
+
 // Node Core
 var fs = require('fs');
 var path = require('path');
+
 
 // CLI
 program
@@ -18,7 +21,7 @@ program
   //.option('-H, --hogan', 'add hogan.js engine support')
   //.option('-c, --css <engine>', 'add stylesheet <engine> support (less|stylus|compass) (defaults to plain css)')
   //.option('-f, --force', 'force on non-empty directory')
-  .parse(process.argv);
+  .parse(process.argv); // grabs arguments passed to the command
 
 // Path
 // ???
@@ -30,27 +33,39 @@ var app_name = path.basename(path.resolve(destination_path));
 
 /**
  * Generate application
+ *
+ * Create the necessary files and folders for bootstrap the bootstrap.
+ * If target directory has content, ask user if they would like to
  */
 (function createApplication(path) {
   emptyDirectory(path, function(empty){
     if (empty || program.force) {
       createApplicationAt(path);
     } else {
-      console.log('destination is not empty.');
-      //program.confirm('destination is not empty, continue? ', function(ok){
-      //  if (ok) {
-      //    process.stdin.destroy();
-      //    createApplicationAt(path);
-      //  } else {
-      //    abort('aborting');
-      //  }
-      //});
+      prompt.message = "";
+      prompt.delimiter = "";
+      prompt.start();
+      prompt.get({
+        properties: {
+          continue: {
+            description: "This folder isn't empty. Continue? [Y/n]".yellow
+          }
+        }
+      },function(err,result) {
+        if (result.continue === 'Y') {
+          process.stdin.destroy();
+          createApplicationAt(path);
+        } else {
+          console.log('*Steps back into house* No slippers today.');
+        }
+      });
     }
   });
 })(destination_path);
 
 function createApplicationAt(path) {
-  console.log();
+
+  // Display instructions to the user after bootstrapping
   process.on('exit', function(){
     console.log();
     console.log('   install dependencies:');
@@ -60,15 +75,15 @@ function createApplicationAt(path) {
     console.log('     $ DEBUG=' + app_name + ' ./bin/www');
     console.log();
   });
-
-  //mkdir(path, function(){
-    //write(path + '/package.json', JSON.stringify(pkg, null, 2));
-    //write(path + '/app.js', app);
-    //mkdir(path + '/bin', function(){
-    //  www = www.replace('{name}', app_name);
-    //  write(path + '/bin/www', www, 0755);
-    //});
-  //});
+  mkdir(path + '/client'); // Just create a client folder
+  // mkdir(path, function(){
+  //   write(path + '/package.json', JSON.stringify(pkg, null, 2));
+  //   write(path + '/app.js', app);
+  //   mkdir(path + '/bin', function(){
+  //    www = www.replace('{name}', app_name);
+  //    write(path + '/bin/www', www, 0755);
+  //   });
+  // });
 }
 
 /**
