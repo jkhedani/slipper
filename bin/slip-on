@@ -21,6 +21,10 @@ program.on('--help', function() {
 });
 program.parse(process.argv); // grabs arguments passed to the command
 
+// Prompt configuration
+prompt.message = "";
+prompt.delimiter = "";
+
 // Determine which slipper we should use.
 var requested_slipper = program.args.shift(); // store requested slipper as string
 var slipper_dir       = path.resolve( __dirname + '/..' ); // slipper/
@@ -34,6 +38,17 @@ var slippers          = fs.readdir(templates_dir, function(err, results) {
 });
 
 /**
+ * Copy File
+ *
+ * @function
+ * @param {String} from
+ * @param {String} to
+ */
+var copyFile = function( from, to) {
+  fs.createReadStream( from ).pipe( fs.createWriteStream( to ) );
+}
+
+/**
  * "Geta"
  * A Gulp styled slipper.
  *
@@ -43,42 +58,56 @@ var geta = function() {
 
   var geta_dir = slipper_dir + '/templates/geta/';
 
-  // Mkdir -p for all client folders
-  mkdir('client/css');
-  mkdir('client/js');
-  mkdir('client/src');
-
   // License
   fs.exists('./LICENSE.md', function(exists) {
     if (exists) {
-      program.confirm('Replace current license?', function(ok) {
-        if (!ok) {
-          // skip making
+      prompt.start();
+      prompt.get({
+        properties: {
+          replace: {
+            description: chalk.cyan('Replace LICENSE.md? [Y,n]')
+          }
+        }
+      }, function (err, result) {
+        if ( result.replace === 'Y' ) {
+          copyFile(geta_dir + 'LICENSE.md', './LICENSE.md');
+          console.log("Replaced LICENSE.md"); // Move along with life.
         } else {
-          fs.createReadStream(geta_dir + 'LICENSE.md').pipe(
-            fs.createWriteStream('./LICENSE.md')
-          );
+          console.log("K!"); // Move along with life.
         }
       });
     } else {
-      fs.createReadStream(geta_dir + 'LICENSE.md').pipe(
-        fs.createWriteStream('./LICENSE.md')
-      );
+      copyFile(geta_dir + 'LICENSE.md', './LICENSE.md');
     }
   });
 
   // Package.json
-  // http://stackoverflow.com/questions/20643470/execute-a-command-line-binary-in-node-js
-  // var exec = require('child_process').exec;
-  // exec('npm install --save-dev gulp', function (error, stdout, stderr) {
-  //   console.log(error);
-  //   console.log(stdout);
-  //   console.log(stderr);
-  // });
+  fs.exists('./package.json', function(exists) {
+    if (exists) {
+      prompt.start();
+      prompt.get({
+        properties: {
+          replace: {
+            description: chalk.cyan('Replace package.json? [Y,n]')
+          }
+        }
+      }, function (err, result) {
+        if ( result.replace === 'Y' ) {
+          copyFile(geta_dir + 'package.json', './package.json');
+          console.log("Replaced package.json"); // Move along with life.
+        } else {
+          console.log("K!"); // Move along with life.
+        }
+      });
+    } else {
+      copyFile(geta_dir + 'package.json', './package.json');
+    }
+  });
 
-  // README.md
-
-  // If "client" folder exists, prompt user for next step.
+  // Mkdir -p for all client folders
+  mkdir('client/css');
+  mkdir('client/js');
+  mkdir('client/src');
 }
 
 // Load the correct slipper template:
