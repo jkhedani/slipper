@@ -4,6 +4,8 @@
 var program = require('commander');
 var mkdirp  = require('mkdirp');
 var prompt  = require('prompt');
+var fs      = require('fs');
+var path    = require('path');
 var chalk   = require('chalk'); // Colors
 var pkg     = require('../package.json');
 var version = pkg.version;
@@ -15,7 +17,7 @@ var path = require('path');
 // CLI configuration
 program
   .version(version)
-  .usage('[options] [slipper-type]')
+  .usage('[options] [slipper-type]');
 
 // CLI "Examples"
 program.on('--help', function() {
@@ -23,18 +25,25 @@ program.on('--help', function() {
 });
 program.parse(process.argv); // grabs arguments passed to the command
 
-// Path & Folder name
-// Defaults to current directory if no [dir] is passed
-// var destination_path = program.args.shift() || '.'; // If no arguement is passed, use current directory.
-// var folder_name = path.basename(path.resolve(destination_path));
+// Determine which slipper we should use.
+var selected_slipper = program.args.shift(); // store desired
+var slipper_dir  = path.resolve( path.dirname() ); // slipper/
+var slippers = fs.readdir(slipper_dir + '/templates', function(err, results) {
+  if (err) throw err;
+  var available_slippers = results.splice(1,1);
+  // If a slipper exists in results and is defined
+  if ( results.indexOf(selected_slipper) !== -1 && selected_slipper ) {
+    console.log("Slipper stay there.");
+  } else {
+    abort('\n '+ chalk.white('No slipper found.') + '\n\n Example: \n\n    $ slip-on geta\n')
+  }
+});
 
-// Get the "slipper" folder directory
-console.log(__dirname);
 
 // If slipper type is undefined or "could not be found"
-if ( ! program.args.shift() ) {
-  abort('\n No slipper found. \n\n Try: \n\n    $ slip-on geta\n');
-}
+// if ( ! program.args.shift() ) {
+//   abort('\n No slipper found. \n\n Try: \n\n    $ slip-on geta\n');
+// }
 
 /**
  * "Geta"
@@ -42,14 +51,13 @@ if ( ! program.args.shift() ) {
  *
  * @function
  */
-var geta = function() {
-  mkdir( folder_name ); // Just create a client folder
-  // mkdir(path + '/client'); // Just create a client folder
-
-  // If "client" folder exists, prompt user for next step.
-}
-
-geta(destination_path);
+// var geta = function() {
+//   mkdir( folder_name ); // Just create a client folder
+//   // mkdir(path + '/client'); // Just create a client folder
+//
+//   // If "client" folder exists, prompt user for next step.
+// }
+// geta(destination_path);
 
 
 // if ( program.args. === 'geta' ) {
@@ -118,6 +126,7 @@ geta(destination_path);
  *
  * @link https://github.com/expressjs/generator
  */
+
 
 /**
  * Check if the given directory `path` is empty.
