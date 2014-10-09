@@ -1,4 +1,5 @@
 # Slipper
+[![Build Status](https://travis-ci.org/jkhedani/slipper.svg)](https://travis-ci.org/jkhedani/slipper)
 You don't need a bootstrap to put on a slipper.
 
 ### Installation
