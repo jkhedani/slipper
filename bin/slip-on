@@ -2,89 +2,114 @@
 
 // Configuration
 var program = require('commander');
-var mkdirp = require('mkdirp');
-var prompt = require('prompt');
-var pkg = require('../package.json');
+var mkdirp  = require('mkdirp');
+var prompt  = require('prompt');
+var chalk   = require('chalk'); // Colors
+var pkg     = require('../package.json');
 var version = pkg.version;
 
 // Node Core
 var fs = require('fs');
 var path = require('path');
 
-
-// CLI
+// CLI configuration
 program
   .version(version)
-  .usage('[options] [dir]')
-  .option('--help', 'Directions for your slipper. You are here.')
-  //.option('    --hbs', 'add handlebars engine support')
-  //.option('-H, --hogan', 'add hogan.js engine support')
-  //.option('-c, --css <engine>', 'add stylesheet <engine> support (less|stylus|compass) (defaults to plain css)')
-  //.option('-f, --force', 'force on non-empty directory')
-  .parse(process.argv); // grabs arguments passed to the command
+  .usage('[options] [slipper-type]')
 
-// Path
-// ???
-var destination_path = program.args.shift() || '.';
+// CLI "Examples"
+program.on('--help', function() {
+  console.log('  Examples:\n\n    $ slip-on --help\n    $ slip-on geta\n\n');
+});
+program.parse(process.argv); // grabs arguments passed to the command
 
-// App name
-// ???
-var app_name = path.basename(path.resolve(destination_path));
+// Path & Folder name
+// Defaults to current directory if no [dir] is passed
+// var destination_path = program.args.shift() || '.'; // If no arguement is passed, use current directory.
+// var folder_name = path.basename(path.resolve(destination_path));
+
+// Get the "slipper" folder directory
+console.log(__dirname);
+
+// If slipper type is undefined or "could not be found"
+if ( ! program.args.shift() ) {
+  abort('\n No slipper found. \n\n Try: \n\n    $ slip-on geta\n');
+}
 
 /**
- * Generate application
+ * "Geta"
+ * A Gulp styled slipper.
  *
- * Create the necessary files and folders for bootstrap the bootstrap.
- * If target directory has content, ask user if they would like to
+ * @function
  */
-(function createApplication(path) {
-  emptyDirectory(path, function(empty){
-    if (empty || program.force) {
-      createApplicationAt(path);
-    } else {
-      prompt.message = "";
-      prompt.delimiter = "";
-      prompt.start();
-      prompt.get({
-        properties: {
-          continue: {
-            description: "This folder isn't empty. Continue? [Y/n]".yellow
-          }
-        }
-      },function(err,result) {
-        if (result.continue === 'Y') {
-          process.stdin.destroy();
-          createApplicationAt(path);
-        } else {
-          console.log('*Steps back into house* No slippers today.');
-        }
-      });
-    }
-  });
-})(destination_path);
+var geta = function() {
+  mkdir( folder_name ); // Just create a client folder
+  // mkdir(path + '/client'); // Just create a client folder
 
-function createApplicationAt(path) {
-
-  // Display instructions to the user after bootstrapping
-  process.on('exit', function(){
-    console.log();
-    console.log('   install dependencies:');
-    console.log('     $ cd %s && npm install', path);
-    console.log();
-    console.log('   run the app:');
-    console.log('     $ DEBUG=' + app_name + ' ./bin/www');
-    console.log();
-  });
-  mkdir(path + '/client'); // Just create a client folder
-  // mkdir(path, function(){
-  //   write(path + '/package.json', JSON.stringify(pkg, null, 2));
-  //   write(path + '/app.js', app);
-  //   mkdir(path + '/bin', function(){
-  //    www = www.replace('{name}', app_name);
-  //    write(path + '/bin/www', www, 0755);
-  //   });
-  // });
+  // If "client" folder exists, prompt user for next step.
 }
+
+geta(destination_path);
+
+
+// if ( program.args. === 'geta' ) {
+//
+// }
+
+// /**
+//  * Generate application
+//  *
+//  * Create the necessary files and folders for bootstrap the bootstrap.
+//  * If target directory has content, ask user if they would like to
+//  */
+// (function createApplication(path) {
+//   emptyDirectory(path, function(empty){
+//     if (empty || program.force) {
+//       createApplicationAt(path);
+//     } else {
+//       prompt.message = "";
+//       prompt.delimiter = "";
+//       prompt.start();
+//       prompt.get({
+//         properties: {
+//           continue: {
+//             description: "This folder isn't empty. Continue? [Y/n]".yellow
+//           }
+//         }
+//       },function(err,result) {
+//         if (result.continue === 'Y') {
+//           process.stdin.destroy();
+//           createApplicationAt(path);
+//         } else {
+//           console.log('No slippers today. You decide to step back into the house.');
+//         }
+//       });
+//     }
+//   });
+// })(destination_path);
+//
+// function createApplicationAt(path) {
+//
+//   // Display instructions to the user after bootstrapping
+//   process.on('exit', function(){
+//     console.log();
+//     console.log('   install dependencies:');
+//     console.log('     $ cd %s && npm install', path);
+//     console.log();
+//     console.log('   run the app:');
+//     console.log('     $ DEBUG=' + app_name + ' ./bin/www');
+//     console.log();
+//   });
+//   mkdir(path + '/client'); // Just create a client folder
+//   // mkdir(path, function(){
+//   //   write(path + '/package.json', JSON.stringify(pkg, null, 2));
+//   //   write(path + '/app.js', app);
+//   //   mkdir(path + '/bin', function(){
+//   //    www = www.replace('{name}', app_name);
+//   //    write(path + '/bin/www', www, 0755);
+//   //   });
+//   // });
+// }
 
 /**
  * Helper Functions
@@ -108,7 +133,6 @@ function emptyDirectory(path, fn) {
   });
 }
 
-
 /**
  * Mkdir -p.
  *
@@ -122,4 +146,17 @@ function mkdir(path, fn) {
     console.log('   \033[36mcreate\033[0m : ' + path);
     fn && fn();
   });
+}
+
+/**
+ * Exit with the given `str`.
+ * Allow for functions to be passed allowing for
+ * prettier console error messages.
+ *
+ * @param {String} msg
+ */
+
+function abort(msg) {
+  console.log(msg);
+  process.exit(1);
 }
