@@ -10,10 +10,6 @@ var chalk   = require('chalk'); // Colors
 var pkg     = require('../package.json');
 var version = pkg.version;
 
-// Node Core
-var fs = require('fs');
-var path = require('path');
-
 // CLI configuration
 program
   .version(version)
@@ -26,24 +22,16 @@ program.on('--help', function() {
 program.parse(process.argv); // grabs arguments passed to the command
 
 // Determine which slipper we should use.
-var selected_slipper = program.args.shift(); // store desired
-var slipper_dir  = path.resolve( path.dirname() ); // slipper/
-var slippers = fs.readdir(slipper_dir + '/templates', function(err, results) {
+var requested_slipper = program.args.shift(); // store requested slipper as string
+var slipper_dir       = path.resolve( __dirname + '/..' ); // slipper/
+var templates_dir     = slipper_dir + '/templates'; // path/to/slipper/templates/
+var slippers          = fs.readdir(templates_dir, function(err, results) {
   if (err) throw err;
-  var available_slippers = results.splice(1,1);
-  // If a slipper exists in results and is defined
-  if ( results.indexOf(selected_slipper) !== -1 && selected_slipper ) {
-    console.log("Slipper stay there.");
-  } else {
-    abort('\n '+ chalk.white('No slipper found.') + '\n\n Example: \n\n    $ slip-on geta\n')
+  //If requested slipper doesn't exist, abort!
+  if ( results.indexOf(requested_slipper) === -1 && ! requested_slipper ) {
+    abort('\n '+ chalk.white('No slipper found.') + '\n\n Example: \n\n    $ slip-on geta\n');
   }
 });
-
-
-// If slipper type is undefined or "could not be found"
-// if ( ! program.args.shift() ) {
-//   abort('\n No slipper found. \n\n Try: \n\n    $ slip-on geta\n');
-// }
 
 /**
  * "Geta"
@@ -51,99 +39,81 @@ var slippers = fs.readdir(slipper_dir + '/templates', function(err, results) {
  *
  * @function
  */
-// var geta = function() {
-//   mkdir( folder_name ); // Just create a client folder
-//   // mkdir(path + '/client'); // Just create a client folder
-//
-//   // If "client" folder exists, prompt user for next step.
-// }
-// geta(destination_path);
+var geta = function() {
 
+  var geta_dir = slipper_dir + '/templates/geta/';
 
-// if ( program.args. === 'geta' ) {
-//
-// }
+  // Mkdir -p for all client folders
+  mkdir('client/css');
+  mkdir('client/js');
+  mkdir('client/src');
 
-// /**
-//  * Generate application
-//  *
-//  * Create the necessary files and folders for bootstrap the bootstrap.
-//  * If target directory has content, ask user if they would like to
-//  */
-// (function createApplication(path) {
-//   emptyDirectory(path, function(empty){
-//     if (empty || program.force) {
-//       createApplicationAt(path);
-//     } else {
-//       prompt.message = "";
-//       prompt.delimiter = "";
-//       prompt.start();
-//       prompt.get({
-//         properties: {
-//           continue: {
-//             description: "This folder isn't empty. Continue? [Y/n]".yellow
-//           }
-//         }
-//       },function(err,result) {
-//         if (result.continue === 'Y') {
-//           process.stdin.destroy();
-//           createApplicationAt(path);
-//         } else {
-//           console.log('No slippers today. You decide to step back into the house.');
-//         }
-//       });
-//     }
-//   });
-// })(destination_path);
-//
-// function createApplicationAt(path) {
-//
-//   // Display instructions to the user after bootstrapping
-//   process.on('exit', function(){
-//     console.log();
-//     console.log('   install dependencies:');
-//     console.log('     $ cd %s && npm install', path);
-//     console.log();
-//     console.log('   run the app:');
-//     console.log('     $ DEBUG=' + app_name + ' ./bin/www');
-//     console.log();
-//   });
-//   mkdir(path + '/client'); // Just create a client folder
-//   // mkdir(path, function(){
-//   //   write(path + '/package.json', JSON.stringify(pkg, null, 2));
-//   //   write(path + '/app.js', app);
-//   //   mkdir(path + '/bin', function(){
-//   //    www = www.replace('{name}', app_name);
-//   //    write(path + '/bin/www', www, 0755);
-//   //   });
-//   // });
-// }
-
-/**
- * Helper Functions
- * Useful helpers created by the expressjs team for
- * their generator.
- *
- * @link https://github.com/expressjs/generator
- */
-
-
-/**
- * Check if the given directory `path` is empty.
- *
- * @param {String} path
- * @param {Function} fn
- */
-
-function emptyDirectory(path, fn) {
-  fs.readdir(path, function(err, files){
-    if (err && 'ENOENT' != err.code) throw err;
-    fn(!files || !files.length);
+  // License
+  fs.exists('./LICENSE.md', function(exists) {
+    if (exists) {
+      program.confirm('Replace current license?', function(ok) {
+        if (!ok) {
+          // skip making
+        } else {
+          fs.createReadStream(geta_dir + 'LICENSE.md').pipe(
+            fs.createWriteStream('./LICENSE.md')
+          );
+        }
+      });
+    } else {
+      fs.createReadStream(geta_dir + 'LICENSE.md').pipe(
+        fs.createWriteStream('./LICENSE.md')
+      );
+    }
   });
+
+  // Package.json
+  // http://stackoverflow.com/questions/20643470/execute-a-command-line-binary-in-node-js
+  // var exec = require('child_process').exec;
+  // exec('npm install --save-dev gulp', function (error, stdout, stderr) {
+  //   console.log(error);
+  //   console.log(stdout);
+  //   console.log(stderr);
+  // });
+
+  // README.md
+
+  // If "client" folder exists, prompt user for next step.
 }
+
+// Load the correct slipper template:
+switch(requested_slipper) {
+  case 'geta':
+    geta();
+    break;
+  case 'rubber-slipper':
+    break;
+  case 'default':
+    abort('\n '+ chalk.white('No slipper found.') + '\n\n Example: \n\n    $ slip-on geta\n');
+    break;
+} // switch
+
+/**
+ * Oeuvre!
+ */
+process.on('exit',function() {
+  if ( Math.random() < 0.33 ) {
+    var msg = "These "+chalk.white("slippers")+" were made for walkin\'!";
+  } else if ( 0.33 > Math.random() > 0.66 ) {
+    var msg = "Different "+chalk.white("slippers")+" for different walks of life.";
+  } else {
+    var msg = chalk.white("Slipper") + " straps are way more comfortable!";
+  }
+  abort("\n   " + msg + "\n");
+});
+
+
+// Helper Functions
+// @link https://github.com/expressjs/generator
 
 /**
  * Mkdir -p.
+ * Useful for making a set of cascaded folders
  *
  * @param {String} path
  * @param {Function} fn
@@ -152,7 +122,7 @@ function emptyDirectory(path, fn) {
 function mkdir(path, fn) {
   mkdirp(path, 0755, function(err){
     if (err) throw err;
-    console.log('   \033[36mcreate\033[0m : ' + path);
+    console.log('   ' + chalk.cyan('create:') + path);
     fn && fn();
   });
 }
