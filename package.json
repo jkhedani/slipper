@@ -22,11 +22,19 @@
   "main": "bin/slip-on",
   "preferGlobal": true,
   "dependencies": {
+    "chalk": "^0.5.1",
     "commander": "^2.3.0",
     "mkdirp": "^0.5.0",
     "prompt": "^0.2.14"
   },
   "bin": {
     "slip-on": "./bin/slip-on"
+  },
+  "devDependencies": {
+    "karma": "^0.12.24",
+    "karma-chrome-launcher": "^0.1.5",
+    "karma-mocha": "^0.1.9",
+    "mocha": "^1.21.4",
+    "should": "^4.0.4"
   }
 }
